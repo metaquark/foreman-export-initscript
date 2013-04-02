@@ -15,6 +15,31 @@ class Foreman::Export::Initscript < Foreman::Export::Base
 #      error("Could not chown #{log} to #{user} - #{e.message}")
 #    end
 
+    error("Must have a rvm version") unless ENV['RVM_VERSION']
+
+    recent = nil
+    version = ENV['RVM_VERSION']
+    dir = "/usr/local/rvm/environments/"
+
+    if version.match /^\d.\d.\d$/
+      Dir.entries(dir).each do |file|
+        match = file.match /^ruby-#{version}-p(\d{3})$/
+        next unless match
+        unless recent
+          recent = match
+          next
+        end
+        if Integer(recent[1]) < Integer(match[1])
+          recent = match
+        end
+      end
+      recent = File.join dir, recent[0]
+    elsif version.match /^\d.\d.\d-p\d{3}$/
+      recent = File.join dir, "ruby-#{version}"
+    else
+      error("No suitable version found in environment")
+    end
+
     name = "initscript/master.erb"
     name_without_first = name.split("/")[1..-1].join("/")
     matchers = []
