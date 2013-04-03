@@ -73,6 +73,35 @@ do_stop()
 	rmdir $PIDDIR
 }
 
+do_status()
+{
+	ALL_RUNNING=1
+	# STATUS APPLICATION: <%= app %>
+	<% engine.each_process do |name, process| %>
+		# STATUS PROCESS: <%= name %>
+		<% 1.upto(engine.formation[name]) do |num| %>
+			# STATUS CONCURRENT: <%= num %>
+				# STATUS: <%= app %>.<%= name %>.<%= num %>
+				RUNNING=0
+				PIDFILE=$PIDDIR/<%= name %>.<%= num %>.pid
+				if [ -f $PIDFILE ]; then
+					kill -0 `cat $PIDFILE` && RUNNING=1
+				fi
+				if [ $RUNNING = 1 ]; then
+					echo "<%= name %>.<%= num %> is running with PID `cat $PIDFILE`"
+				else
+					ALL_RUNNING=0
+					echo "<%= name %>.<%= num %> is stopped"
+				fi
+		<% end %>
+	<% end %>
+	if [ $ALL_RUNNING = 1 ]; then
+		return 0
+	else
+		return 1
+	fi 
+}
+
 case "$1" in
   start)
 	[ "$VERBOSE" != no ] && log_daemon_msg "Starting $DESC" "$NAME"
@@ -91,8 +120,8 @@ case "$1" in
 	esac
 	;;
   status)
-       status_of_proc "$DAEMON" "$NAME" && exit 0 || exit $?
-       ;;
+	do_status && exit 0 || exit $?
+	;;
   #reload|force-reload)
 	#
 	# If do_reload() is not implemented then leave this commented out
