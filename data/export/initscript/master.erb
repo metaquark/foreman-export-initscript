@@ -58,11 +58,10 @@ do_stop()
 		<% 1.upto(engine.formation[name]) do |num| %>
 			# STOP CONCURRENT: <%= num %>
 				# Stop: <%= app %>.<%= name %>.<%= num %>
-				kill `cat $PIDDIR/<%= name %>.<%= num %>.pid`
-				rm $PIDDIR/<%= name %>.<%= num %>.pid
+				PIDFILE=$PIDDIR/<%= name %>.<%= num %>.pid
+				kill `cat $PIDFILE`
 		<% end %>
 	<% end %>
-	rmdir $PIDDIR
 }
 
 do_status()
