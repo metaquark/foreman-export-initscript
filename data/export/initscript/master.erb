@@ -97,15 +97,10 @@ case "$1" in
   start)
 	[ "$VERBOSE" != no ] && echo "Starting $NAME"
 	do_start
-	case "$?" in
-		0|1) [ "$VERBOSE" != no ] && echo success ;;
-		2) [ "$VERBOSE" != no ] && echo failed ;;
-	esac
 	;;
   stop)
 	[ "$VERBOSE" != no ] && echo "Stopping $NAME"
 	do_stop
-	esac
 	;;
   status)
 	do_status && exit 0 || exit $?
@@ -124,22 +119,9 @@ case "$1" in
 	# If the "reload" option is implemented then remove the
 	# 'force-reload' alias
 	#
-	echo "Restarting $DESC" "$NAME"
+	[ "$VERBOSE" != no ] && echo "Restarting $NAME"
 	do_stop
-	case "$?" in
-	  0|1)
-		do_start
-		case "$?" in
-			0) echo success ;;
-			1) echo "old process is still running" ;; # Old process is still running
-			*) echo failed ;; # Failed to start
-		esac
-		;;
-	  *)
-	  	# Failed to stop
-		echo "failed to stop"
-		;;
-	esac
+	do_start
 	;;
   *)
 	echo "Usage: $SCRIPTNAME {start|stop|status|restart}" >&2
