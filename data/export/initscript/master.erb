@@ -59,7 +59,7 @@ do_stop()
 			# STOP CONCURRENT: <%= num %>
 				# Stop: <%= app %>.<%= name %>.<%= num %>
 				PIDFILE=$PIDDIR/<%= name %>.<%= num %>.pid
-				kill `cat $PIDFILE`
+				kill `cat $PIDFILE` 2> /dev/null && echo "Stopped <%= name %>.<%= num %> with PID `cat $PIDFILE`" || echo "<%= name %>.<%= num %> is already stopped"
 		<% end %>
 	<% end %>
 }
@@ -105,9 +105,6 @@ case "$1" in
   stop)
 	[ "$VERBOSE" != no ] && echo "Stopping $NAME"
 	do_stop
-	case "$?" in
-		0|1) [ "$VERBOSE" != no ] && echo success ;;
-		2) [ "$VERBOSE" != no ] && echo failed ;;
 	esac
 	;;
   status)
