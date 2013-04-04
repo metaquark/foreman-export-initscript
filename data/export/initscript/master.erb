@@ -41,10 +41,20 @@ do_start()
 			# START CONCURRENT: <%= num %>
 				# Start: <%= app %>.<%= name %>.<%= num %>
 				# Create $PIDDIR/<%= name %>.<%= num %>.pid
-				((su - $USERNAME -c 'source <%= recent %>; cd <%= engine.root %>; export PORT=<%= engine.port_for(process, num) %>;<% engine.environment.each_pair do |var,env| %> export <%= var.upcase %>=<%= env %>; <% end %> RAILS_ENV=production <%= process.command %> >> <%= log %>/<%=name%>-<%=num%>.log 2>&1 & echo $!') > $PIDDIR/<%= name %>.<%= num %>.pid)
+				PIDFILE=$PIDDIR/<%= name %>.<%= num %>.pid
+
+				RUNNING=0
+				if [ -f $PIDFILE ]; then
+					kill -0 `cat $PIDFILE` 2> /dev/null && RUNNING=1
+				fi
+				if [ $RUNNING = 1 ]; then
+					echo "<%= name %>.<%= num %> is running already with PID `cat $PIDFILE`, consider stopping it first"
+				else
+					((su - $USERNAME -c 'source <%= recent %>; cd <%= engine.root %>; export PORT=<%= engine.port_for(process, num) %>;<% engine.environment.each_pair do |var,env| %> export <%= var.upcase %>=<%= env %>; <% end %> RAILS_ENV=production <%= process.command %> >> <%= log %>/<%=name%>-<%=num%>.log 2>&1 & echo $!') > $PIDFILE)
+					echo "Started <%= name %>.<%= num %> with PID `cat $PIDFILE`"
+				fi
 		<% end %>
 	<% end %>
-
 }
 
 #
@@ -59,7 +69,7 @@ do_stop()
 			# STOP CONCURRENT: <%= num %>
 				# Stop: <%= app %>.<%= name %>.<%= num %>
 				PIDFILE=$PIDDIR/<%= name %>.<%= num %>.pid
-				kill `cat $PIDFILE` 2> /dev/null && echo "Stopped <%= name %>.<%= num %> with PID `cat $PIDFILE`" || echo "<%= name %>.<%= num %> is already stopped"
+				kill `cat $PIDFILE` 2> /dev/null && echo "Stopping <%= name %>.<%= num %> with PID `cat $PIDFILE`" || echo "<%= name %>.<%= num %> is already stopped"
 		<% end %>
 	<% end %>
 }
