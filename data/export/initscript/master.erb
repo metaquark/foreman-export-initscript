@@ -69,7 +69,11 @@ do_stop()
 			# STOP CONCURRENT: <%= num %>
 				# Stop: <%= app %>.<%= name %>.<%= num %>
 				PIDFILE=$PIDDIR/<%= name %>.<%= num %>.pid
-				kill `cat $PIDFILE` 2> /dev/null && echo "Stopping <%= name %>.<%= num %> with PID `cat $PIDFILE`" || echo "<%= name %>.<%= num %> is already stopped"
+				if [ -f $PIDFILE ]; then
+					kill `cat $PIDFILE` 2> /dev/null && echo "Stopping <%= name %>.<%= num %> with PID `cat $PIDFILE`" || echo "<%= name %>.<%= num %> is already stopped"
+				else
+					echo "<%= name %>.<%= num %> is already stopped"
+				fi
 		<% end %>
 	<% end %>
 }
