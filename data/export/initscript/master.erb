@@ -76,7 +76,7 @@ do_status()
 				RUNNING=0
 				PIDFILE=$PIDDIR/<%= name %>.<%= num %>.pid
 				if [ -f $PIDFILE ]; then
-					kill -0 `cat $PIDFILE` && RUNNING=1
+					kill -0 `cat $PIDFILE` 2> /dev/null && RUNNING=1
 				fi
 				if [ $RUNNING = 1 ]; then
 					echo "<%= name %>.<%= num %> is running with PID `cat $PIDFILE`"
