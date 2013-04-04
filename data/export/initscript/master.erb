@@ -70,7 +70,12 @@ do_stop()
 				# Stop: <%= app %>.<%= name %>.<%= num %>
 				PIDFILE=$PIDDIR/<%= name %>.<%= num %>.pid
 				if [ -f $PIDFILE ]; then
-					kill `cat $PIDFILE` 2> /dev/null && echo "Stopping <%= name %>.<%= num %> with PID `cat $PIDFILE`" || echo "<%= name %>.<%= num %> is already stopped"
+					echo -n "Stopping <%= name %>.<%= num %> with PID `cat $PIDFILE`... "
+					kill `cat $PIDFILE` 2> /dev/null
+					while kill -0 `cat $PIDFILE` 2> /dev/null; do
+						sleep 0.5
+					done
+					echo "done"
 				else
 					echo "<%= name %>.<%= num %> is already stopped"
 				fi
