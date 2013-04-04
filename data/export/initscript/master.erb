@@ -95,7 +95,7 @@ do_status()
 
 case "$1" in
   start)
-	[ "$VERBOSE" != no ] && echo "Starting $DESC" "$NAME"
+	[ "$VERBOSE" != no ] && echo "Starting $NAME"
 	do_start
 	case "$?" in
 		0|1) [ "$VERBOSE" != no ] && echo success ;;
@@ -103,7 +103,7 @@ case "$1" in
 	esac
 	;;
   stop)
-	[ "$VERBOSE" != no ] && echo "Stopping $DESC" "$NAME"
+	[ "$VERBOSE" != no ] && echo "Stopping $NAME"
 	do_stop
 	case "$?" in
 		0|1) [ "$VERBOSE" != no ] && echo success ;;
