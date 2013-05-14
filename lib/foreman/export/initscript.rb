@@ -15,29 +15,28 @@ class Foreman::Export::Initscript < Foreman::Export::Base
 #      error("Could not chown #{log} to #{user} - #{e.message}")
 #    end
 
-    error("Must have a rvm version") unless ENV['RVM_VERSION']
+    if rvm_version = ENV['RVM_VERSION']
+      rvm_path = nil
+      rvm_base_dir = "/usr/local/rvm/environments/"
 
-    recent = nil
-    version = ENV['RVM_VERSION']
-    dir = "/usr/local/rvm/environments/"
-
-    if version.match /^\d.\d.\d$/
-      Dir.entries(dir).each do |file|
-        match = file.match /^ruby-#{version}-p(\d{3})$/
-        next unless match
-        unless recent
-          recent = match
-          next
+      if rvm_version.match /^\d.\d.\d$/
+        Dir.entries(rvm_base_dir).each do |file|
+          match = file.match /^ruby-#{rvm_version}-p(\d{3})$/
+          next unless match
+          unless rvm_path
+            rvm_path = match
+            next
+          end
+          if Integer(rvm_path[1]) < Integer(match[1])
+            rvm_path = match
+          end
         end
-        if Integer(recent[1]) < Integer(match[1])
-          recent = match
-        end
+        rvm_path = File.join rvm_base_dir, rvm_path[0]
+      elsif rvm_version.match /^\d.\d.\d-p\d{3}$/
+        rvm_path = File.join rvm_base_dir, "ruby-#{rvm_version}"
+      else
+        error("No suitable rvm version found in environment")
       end
-      recent = File.join dir, recent[0]
-    elsif version.match /^\d.\d.\d-p\d{3}$/
-      recent = File.join dir, "ruby-#{version}"
-    else
-      error("No suitable version found in environment")
     end
 
     name = "initscript/master.erb"
